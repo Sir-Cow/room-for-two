@@ -10,6 +10,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import sircow.roomfortwo.util.BedOccupancyTracker;
 
 @Mixin(Camera.class)
 public abstract class ForgeCameraMixin {
@@ -32,7 +33,10 @@ public abstract class ForgeCameraMixin {
                 this.partialTickTime = partialTick;
 
                 this.setPosition(livingEntity.getX(), livingEntity.getY() + (double) this.eyeHeight, livingEntity.getZ());
-                move(-0.5F, 0.1F, 0.0F);
+
+                int slot = BedOccupancyTracker.getSlot(this.entity.getId());
+                float verticalOffset = ((float) slot / 2) * 0.25F;
+                move(-0.5F, 0.1F, 0.0F - verticalOffset);
                 ci.cancel();
             }
         }

@@ -42,6 +42,7 @@ public abstract class CameraMixin {
         if (dir == Direction.NORTH || dir == Direction.SOUTH) rotation.rotateX((float) Math.toRadians(90.0));
         if (dir == Direction.EAST || dir == Direction.WEST) rotation.rotateX((float) Math.toRadians(-90.0));
 
-        move(-0.75F, 0.1F, 0.0F);
+        float verticalOffset = ((float) slot / 2) * 0.25F;
+        move(-0.75F, 0.1F, 0.0F + verticalOffset);
     }
 }
