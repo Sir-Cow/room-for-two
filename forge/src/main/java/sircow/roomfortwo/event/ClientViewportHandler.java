@@ -42,14 +42,15 @@ public class ClientViewportHandler {
         event.setYaw(targetYaw);
         event.setPitch(0.0F);
         event.setRoll(targetRoll);
-        moveCameraFree(camera);
+        moveCameraFree(camera, slot);
     }
 
-    private static void moveCameraFree(Camera camera) {
+    private static void moveCameraFree(Camera camera, int slot) {
         try {
             Method moveMethodDev = Camera.class.getDeclaredMethod("move", float.class, float.class, float.class);
             moveMethodDev.setAccessible(true);
-            moveMethodDev.invoke(camera, (float) -0.5, (float) 0.1, (float) 0.0);
+            float verticalOffset = ((float) slot / 2) * 0.25F;
+            moveMethodDev.invoke(camera, (float) -0.5, (float) 0.1, (float) 0.0 - verticalOffset);
         }
         catch (Exception ignored) {}
     }

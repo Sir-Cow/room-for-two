@@ -43,7 +43,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = 'room-for-two'
+rootProject.name = rootProject.projectDir.getName()
 includeBuild('build-logic')
 include('common')
 include('fabric')
