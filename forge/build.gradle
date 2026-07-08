@@ -3,7 +3,7 @@ plugins {
     id 'net.neoforged.moddev.legacyforge'
 }
 base {
-    archivesName = "${mod_name}-forge-${minecraft_version}"
+    archivesName = "${mod_id}-forge-${minecraft_version}"
 }
 mixin {
     add(sourceSets.main, "${mod_id}.refmap.json")
@@ -46,7 +46,7 @@ sourceSets.main.resources.srcDir 'src/generated/resources'
 
 dependencies {
     compileOnly project(":common")
-    annotationProcessor("org.spongepowered:mixin:0.8.7-SNAPSHOT:processor")
+    annotationProcessor("org.spongepowered:mixin:0.8.7:processor")
 }
 
 jar {
@@ -58,7 +58,7 @@ jar {
 
 def loaderAttribute = Attribute.of('io.github.mcgradleconventions.loader', String)
 ['apiElements', 'runtimeElements', 'sourcesElements', 'javadocElements'].each { variant ->
-    configurations.named("$variant") {
+    configurations.named(variant) {
         attributes {
             attribute(loaderAttribute, 'forge')
         }

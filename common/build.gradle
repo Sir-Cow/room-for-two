@@ -6,13 +6,14 @@ plugins {
 legacyForge {
     mcpVersion = minecraft_version
     def aw = file("src/main/resources/${mod_id}.accesswidener")
-    if(aw.exists()){
+    if (aw.exists()) {
         accessWideners(aw)
     }
 }
 
 dependencies {
-    compileOnly group: 'org.spongepowered', name: 'mixin', version: '0.8.7'
+    compileOnly('net.fabricmc:sponge-mixin:0.17.3+mixin.0.8.7')
+    compileOnly(annotationProcessor('io.github.llamalad7:mixinextras-common:0.5.4'))
 }
 
 configurations {
@@ -24,10 +25,6 @@ configurations {
         canBeResolved = false
         canBeConsumed = true
     }
-
-    [apiElements, runtimeElements].each { cfg ->
-        cfg.outgoing.capability("${project.group}:${mod_id}:${project.version}")
-    }
 }
 
 artifacts {
@@ -37,7 +34,7 @@ artifacts {
 
 def loaderAttribute = Attribute.of('io.github.mcgradleconventions.loader', String)
 ['apiElements', 'runtimeElements'].each { variant ->
-    configurations.named("$variant") {
+    configurations.named(variant) {
         attributes {
             attribute(loaderAttribute, 'common')
         }
@@ -45,7 +42,7 @@ def loaderAttribute = Attribute.of('io.github.mcgradleconventions.loader', Strin
 }
 sourceSets.configureEach {
     [it.compileClasspathConfigurationName, it.runtimeClasspathConfigurationName].each { variant->
-        configurations.named("$variant") {
+        configurations.named(variant) {
             attributes {
                 attribute(loaderAttribute, 'common')
             }

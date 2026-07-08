@@ -13,17 +13,6 @@ pluginManagement {
                 includeGroupAndSubgroups("net.minecraftforge")
             }
         }
-        exclusiveContent {
-            forRepository {
-                maven {
-                    name = 'Sponge'
-                    url = uri('https://repo.spongepowered.org/repository/maven-public')
-                }
-            }
-            filter {
-                includeGroupAndSubgroups("org.spongepowered")
-            }
-        }
     }
 }
 
@@ -31,6 +20,7 @@ plugins {
     id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
 }
 
-rootProject.name = 'room-for-two'
+rootProject.name = rootProject.projectDir.getName()
+includeBuild('build-logic')
 include('common')
 include('forge')
