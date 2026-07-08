@@ -17,7 +17,6 @@
 These are subject to change and I'm open for any feedback (Open a github issue or DM me on Twitter). The goal I want for this mod is to keep it fairly simplistic, this means no new blocks or items.
 - Position preferences (what side you face, on front or back)
 - Better camera when entering the bed not in first person
-- Port to as many mc versions & loaders as possible
 
 ## ⚙️ Modpack Usage
 Room for Two is free to be used in any custom modpacks as long as credit is provided. However, compatibility with existing mods has not been tested for, so use at your own risk. I do not permit for any sort of monetisation or generative AI usage.
