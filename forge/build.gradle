@@ -4,7 +4,7 @@ plugins {
     id 'net.minecraftforge.jarjar' version '0.2.3'
 }
 base {
-    archivesName = "${mod_name}-forge-${minecraft_version}"
+    archivesName = "${mod_id}-forge-${minecraft_version}"
 }
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(25)
