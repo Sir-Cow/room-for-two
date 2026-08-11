@@ -16,17 +16,12 @@ neoForge {
         }
         client {
             client()
-            gameDirectory = this.mkdir(this.file('runs/client'))
         }
         data {
-            data()
-            gameDirectory = this.mkdir(this.file('runs/data'))
-            programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+            clientData()
         }
         server {
             server()
-            this.file("runs/server").createParentDirectories()
-            gameDirectory = this.mkdir(this.file('runs/server'))
         }
     }
     mods {

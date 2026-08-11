@@ -12,6 +12,7 @@
   "client": [
     "CameraMixin",
     "EntityRendererMixin",
+    "EntityRenderStateMixin",
     "LivingEntityRendererMixin"
   ],
   "server": [],

@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 
 public final class BedOccupancyTracker {
     private static final Map<Integer, Integer> clientSlotCache = new ConcurrentHashMap<>();
-
     private static final Map<BlockPos, List<Integer>> serverBedOrders = new ConcurrentHashMap<>();
 
     private BedOccupancyTracker() {}
