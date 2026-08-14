@@ -1,13 +1,14 @@
 package sircow.roomfortwo.mixin;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Axis;
+import com.mojang.math.Vector3f;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -15,8 +16,10 @@ import sircow.roomfortwo.util.BedOccupancyTracker;
 
 @Mixin(LivingEntityRenderer.class)
 public class LivingEntityRendererMixin {
+    @Unique private static final Vector3f Y_AXIS = new Vector3f(0.0F, 1.0F, 0.0F);
+
     @Inject(method = "setupRotations", at = @At("TAIL"))
-    private void roomfortwo$rotateSleepingEntities(LivingEntity livingEntity, PoseStack poseStack, float animationProgress, float bodyYaw, float tickDelta, float scale, CallbackInfo ci) {
+    private void roomfortwo$rotateSleepingEntities(LivingEntity livingEntity, PoseStack poseStack, float animationProgress, float bodyYaw, float tickDelta, CallbackInfo ci) {
         if (!livingEntity.hasPose(Pose.SLEEPING)) return;
         if (!livingEntity.isSleeping()) return;
 
@@ -35,12 +38,12 @@ public class LivingEntityRendererMixin {
         boolean localPlayer = livingEntity == minecraft.player;
 
         if (firstPerson && localPlayer) {
-            if (slot % 2 == 0) poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
-            else poseStack.mulPose(Axis.YP.rotationDegrees(-90.0F));
+            if (slot % 2 == 0) poseStack.mulPose(Y_AXIS.rotationDegrees(90.0F));
+            else poseStack.mulPose(Y_AXIS.rotationDegrees(-90.0F));
         }
         else {
-            if (slot % 2 == 0) poseStack.mulPose(Axis.YP.rotationDegrees(-90.0F));
-            else poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
+            if (slot % 2 == 0) poseStack.mulPose(Y_AXIS.rotationDegrees(-90.0F));
+            else poseStack.mulPose(Y_AXIS.rotationDegrees(90.0F));
         }
     }
 }

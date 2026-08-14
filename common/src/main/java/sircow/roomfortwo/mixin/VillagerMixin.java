@@ -15,7 +15,7 @@ public class VillagerMixin {
     private void roomfortwo$kickFromBed(Player player, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
         Villager villager = (Villager) (Object) this;
         if (!villager.isSleeping()) return;
-        if (villager.level().isClientSide()) return;
+        if (villager.getLevel().isClientSide()) return;
 
         villager.stopSleeping();
         cir.setReturnValue(InteractionResult.SUCCESS);

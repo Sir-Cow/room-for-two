@@ -30,7 +30,7 @@ public class EntityRendererMixin {
     }
 
     @Inject(method = "renderNameTag", at = @At("HEAD"), cancellable = true)
-    private void roomfortwo$removeOtherPlayerNametagsWhileSleeping(Entity entity, Component component, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, float partialTick, CallbackInfo ci) {
+    private void roomfortwo$removeOtherPlayerNametagsWhileSleeping(Entity entity, Component component, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, CallbackInfo ci) {
         if (entity instanceof Player && entity.hasPose(Pose.SLEEPING)) {
             LocalPlayer localPlayer = Minecraft.getInstance().player;
 

@@ -18,6 +18,6 @@ public class ForgeNetworkImpl implements IPlatformNetwork {
         double radius = 128.0;
 
         PacketDistributor.TargetPoint targetPoint = new PacketDistributor.TargetPoint(null, x, y, z, radius, level.dimension());
-        ForgeNetworkRegistry.INSTANCE.send(payload, PacketDistributor.NEAR.with(targetPoint));
+        ForgeNetworkRegistry.INSTANCE.send(PacketDistributor.NEAR.with(() -> targetPoint), payload);
     }
 }

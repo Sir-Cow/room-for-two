@@ -1,3 +1,5 @@
+import groovy.json.JsonOutput
+
 plugins {
     id 'java-library'
     id 'maven-publish'
@@ -23,6 +25,10 @@ java {
     publishing.publications.configureEach {
         suppressPomMetadataWarningsFor(variant)
     }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
 }
 
 tasks.withType(Jar).configureEach {
@@ -63,9 +69,6 @@ processResources {
             'mod_id'                       : mod_id,
             'license'                      : license,
             'description'                  : project.description,
-            'neoforge_version'             : neoforge_version,
-            'neoforge_loader_version_range': neoforge_loader_version_range,
-            'neoforge_version_range'       : neoforge_version_range,
             "forge_version"                : forge_version,
             "forge_loader_version_range"   : forge_loader_version_range,
             "forge_version_range"          : forge_version_range,
@@ -74,10 +77,10 @@ processResources {
     ]
 
     var jsonExpandProps = expandProps.collectEntries {
-        key, value -> [(key): value instanceof String ? value.replace('\n', '\\\\n') : value]
+        key, value -> [(key): value instanceof String ? JsonOutput.toJson(value).replaceAll('^"|"$', '') : value]
     }
 
-    filesMatching(['META-INF/mods.toml', 'META-INF/neoforge.mods.toml']) {
+    filesMatching('META-INF/mods.toml') {
         expand expandProps
     }
 

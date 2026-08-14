@@ -3,11 +3,9 @@
   "minVersion": "0.8",
   "package": "sircow.roomfortwo.mixin",
   "refmap": "${mod_id}.refmap.json",
-  "compatibilityLevel": "JAVA_21",
+  "compatibilityLevel": "JAVA_17",
   "mixins": [],
-  "client": [
-    "ForgeCameraMixin"
-  ],
+  "client": [],
   "server": [],
   "injectors": {
     "defaultRequire": 1
