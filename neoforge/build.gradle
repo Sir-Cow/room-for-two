@@ -25,7 +25,7 @@ neoForge {
         }
         server {
             server()
-            this.file("runs/server").createParentDirectories()
+            this.file('runs/server').createParentDirectories()
             gameDirectory = this.mkdir(this.file('runs/server'))
         }
     }

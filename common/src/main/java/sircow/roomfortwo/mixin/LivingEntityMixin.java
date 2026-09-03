@@ -2,6 +2,7 @@ package sircow.roomfortwo.mixin;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
@@ -10,6 +11,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import sircow.roomfortwo.trigger.ModTriggers;
 import sircow.roomfortwo.util.BedOccupancyTracker;
 
 import java.util.Optional;
@@ -33,6 +35,15 @@ public abstract class LivingEntityMixin {
         if (!self.level().isClientSide() && self.level() instanceof ServerLevel serverLevel) {
             BedOccupancyTracker.updateBedOccupancy(serverLevel, pos, -1, self.getId(), this.roomfortwo$preSleepPos);
             this.roomfortwo$preSleepPos = null;
+
+            int count = BedOccupancyTracker.getOccupantCount(serverLevel, pos);
+            if (count >= 2) {
+                for (LivingEntity occupant : BedOccupancyTracker.getOccupants(serverLevel, pos)) {
+                    if (occupant instanceof ServerPlayer occupantPlayer) {
+                        ModTriggers.BED_OCCUPANCY.trigger(occupantPlayer);
+                    }
+                }
+            }
         }
     }
 

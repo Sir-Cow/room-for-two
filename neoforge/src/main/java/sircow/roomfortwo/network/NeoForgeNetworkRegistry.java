@@ -15,7 +15,7 @@ public class NeoForgeNetworkRegistry {
         registrar.playToClient(
                 BedOccupancySyncPayload.TYPE,
                 BedOccupancySyncPayload.STREAM_CODEC,
-                (payload, context) -> context.enqueueWork(() -> BedOccupancyTracker.updateClientCache(payload.entitySlots()))
+                (payload, context) -> context.enqueueWork(() -> BedOccupancyTracker.updateClientCache(payload.entitySlots(), payload.entitySleepPositions()))
         );
     }
 }
