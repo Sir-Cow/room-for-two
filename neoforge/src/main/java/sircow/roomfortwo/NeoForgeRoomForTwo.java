@@ -4,8 +4,8 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 
 @Mod(Constants.MOD_ID)
-public class RoomForTwo {
-    public RoomForTwo(IEventBus eventBus) {
+public class NeoForgeRoomForTwo {
+    public NeoForgeRoomForTwo(IEventBus eventBus) {
         CommonClass.init();
     }
 }

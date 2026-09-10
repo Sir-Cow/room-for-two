@@ -1,0 +1,92 @@
+plugins {
+    id 'multiloader-loader'
+    id 'net.minecraftforge.gradle' version '7.0.34'
+    id 'net.minecraftforge.jarjar' version '0.2.3'
+    id 'net.minecraftforge.renamer' version '1.1.0'
+}
+base {
+    archivesName = "${mod_id}-forge-${minecraft_version}"
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+minecraft {
+    mappings channel: 'official', version: minecraft_version
+
+    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg').exists()
+
+    runs {
+        configureEach {
+            workingDir.convention layout.projectDirectory.dir('runs/' + name)
+
+            mods {
+                "${mod_id}" {
+                    source sourceSets.main
+                    source project(':common').sourceSets.main
+                }
+            }
+
+            args "--mixin.config=${mod_id}.mixins.json", "--mixin.config=${mod_id}.forge.mixins.json"
+
+            systemProperty 'forge.logging.console.level', 'debug'
+            systemProperty 'eventbus.api.strictRuntimeChecks', 'true'
+        }
+
+        register('client') {}
+        register('server') { args '--nogui' }
+    }
+}
+
+dependencies {
+    implementation minecraft.dependency("net.minecraftforge:forge:${minecraft_version}-${forge_version}")
+    compileOnly project(':common')
+}
+
+renamer.enableMixinRefmaps {
+    config "${mod_id}.mixins.json"
+    config "${mod_id}.forge.mixins.json"
+}
+
+renamer.classes(tasks.named('jar', Jar)) {
+    archiveClassifier = 'srg'
+    mappings renamer.mixin.generatedMappings
+}
+
+renamer.mappings(minecraft.dependency.toSrg)
+
+sourceSets.main.resources { srcDir layout.projectDirectory.dir('src/generated/resources') }
+
+repositories {
+    minecraft.mavenizer(it)
+    maven fg.minecraftLibsMaven
+    maven fg.forgeMaven
+    mavenCentral()
+}
+
+tasks.named('jar', Jar) {
+    manifest {
+        attributes([
+                "MixinConfigs": "${mod_id}.mixins.json,${mod_id}.forge.mixins.json"
+        ])
+    }
+}
+
+jarJar.register() {
+    archiveClassifier = null
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+def loaderAttribute = Attribute.of('io.github.mcgradleconventions.loader', String)
+['apiElements', 'runtimeElements', 'sourcesElements', 'javadocElements'].each { variant ->
+    configurations.named(variant) {
+        attributes {
+            attribute(loaderAttribute, 'forge')
+        }
+    }
+}
+
+sourceSets.each {
+    def dir = layout.buildDirectory.dir("sourcesSets/$it.name")
+    it.output.resourcesDir = dir
+    it.java.destinationDirectory = dir
+}
