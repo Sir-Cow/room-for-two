@@ -1,0 +1,25 @@
+{
+  "parent": "minecraft:adventure/sleep_in_bed",
+  "criteria": {
+    "bed_occupancy": {
+      "trigger": "roomfortwo:bed_occupancy"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.roomfortwo.multiple_sleep_in_bed.description"
+    },
+    "icon": {
+      "id": "minecraft:magenta_bed"
+    },
+    "title": {
+      "translate": "advancements.roomfortwo.multiple_sleep_in_bed.title"
+    }
+  },
+  "requirements": [
+    [
+      "bed_occupancy"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

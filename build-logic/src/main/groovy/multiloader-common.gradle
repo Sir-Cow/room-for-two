@@ -1,3 +1,5 @@
+import groovy.json.JsonOutput
+
 plugins {
     id 'java-library'
     id 'maven-publish'
@@ -23,6 +25,10 @@ java {
     publishing.publications.configureEach {
         suppressPomMetadataWarningsFor(variant)
     }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
 }
 
 tasks.withType(Jar).configureEach {
@@ -74,7 +80,7 @@ processResources {
     ]
 
     var jsonExpandProps = expandProps.collectEntries {
-        key, value -> [(key): value instanceof String ? value.replace('\n', '\\\\n') : value]
+        key, value -> [(key): value instanceof String ? JsonOutput.toJson(value).replaceAll('^"|"$', '') : value]
     }
 
     filesMatching(['META-INF/mods.toml', 'META-INF/neoforge.mods.toml']) {

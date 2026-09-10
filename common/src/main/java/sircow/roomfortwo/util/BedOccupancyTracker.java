@@ -16,8 +16,9 @@ import java.util.stream.Collectors;
 
 public final class BedOccupancyTracker {
     private static final Map<Integer, Integer> clientSlotCache = new ConcurrentHashMap<>();
-
+    private static final Map<Integer, SleepPosition> clientSleepPosCache = new ConcurrentHashMap<>();
     private static final Map<BlockPos, List<Integer>> serverBedOrders = new ConcurrentHashMap<>();
+    private static final Map<Integer, SleepPosition> serverSleepPosCache = new ConcurrentHashMap<>();
 
     private BedOccupancyTracker() {}
 
@@ -25,12 +26,74 @@ public final class BedOccupancyTracker {
         return clientSlotCache.getOrDefault(entityId, 0);
     }
 
-    public static void updateClientCache(Map<Integer, Integer> map) {
+    public static SleepPosition getSleepPos(int entityId) {
+        return clientSleepPosCache.getOrDefault(entityId, SleepPosition.NONE);
+    }
+
+    public static void updateClientCache(Map<Integer, Integer> map, Map<Integer, SleepPosition> sleepPositions) {
         clientSlotCache.putAll(map);
+        clientSleepPosCache.putAll(sleepPositions);
     }
 
     public static void cleanClientEntity(int entityId) {
         clientSlotCache.remove(entityId);
+        clientSleepPosCache.remove(entityId);
+    }
+
+    public static void setServerSleepPos(int entityId, SleepPosition sleepPos) {
+        serverSleepPosCache.put(entityId, sleepPos);
+    }
+
+    public static SleepPosition getServerSleepPos(int entityId) {
+        return serverSleepPosCache.getOrDefault(entityId, SleepPosition.NONE);
+    }
+
+    public static void removeServerSleepPos(int entityId) {
+        serverSleepPosCache.remove(entityId);
+    }
+
+    public static int getOccupantCount(ServerLevel level, BlockPos bedPos) {
+        List<Integer> bedOrder = serverBedOrders.get(bedPos);
+        if (bedOrder != null) {
+            int count = 0;
+            for (int id : bedOrder) {
+                if (id == -1) continue;
+                if (level.getEntity(id) instanceof LivingEntity e && e.isSleeping()) {
+                    count++;
+                }
+            }
+            if (count > 0) return count;
+        }
+        return level.getEntitiesOfClass(
+                LivingEntity.class,
+                new AABB(bedPos).inflate(4.0), entity -> entity.isSleeping() && entity.getSleepingPos().map(bedPos::equals).orElse(false)
+        ).size();
+    }
+
+    public static List<LivingEntity> getOccupants(ServerLevel level, BlockPos bedPos) {
+        List<Integer> bedOrder = serverBedOrders.get(bedPos);
+
+        if (bedOrder != null) {
+            List<LivingEntity> occupants = new ArrayList<>();
+
+            for (int id : bedOrder) {
+                if (id == -1) continue;
+                if (level.getEntity(id) instanceof LivingEntity e && e.isSleeping()) occupants.add(e);
+            }
+            if (!occupants.isEmpty()) return occupants;
+        }
+        return level.getEntitiesOfClass(
+                LivingEntity.class,
+                new AABB(bedPos).inflate(4.0), entity -> entity.isSleeping() && entity.getSleepingPos().map(bedPos::equals).orElse(false)
+        );
+    }
+
+    public static boolean hasOccupantType(ServerLevel level, BlockPos bedPos, Class<? extends LivingEntity> type) {
+        return getOccupants(level, bedPos).stream().anyMatch(type::isInstance);
+    }
+
+    public static int countOccupantType(ServerLevel level, BlockPos bedPos, Class<? extends LivingEntity> type) {
+        return (int) getOccupants(level, bedPos).stream().filter(type::isInstance).count();
     }
 
     public static void updateBedOccupancy(ServerLevel level, BlockPos bedPos, int leavingEntityId, int enteringEntityId, Vec3 enteringPos) {
@@ -62,8 +125,8 @@ public final class BedOccupancyTracker {
         }
 
         Set<Integer> currentSleeperIds = sleepers.stream().map(LivingEntity::getId).collect(Collectors.toSet());
-
         List<Integer> bedOrder = serverBedOrders.computeIfAbsent(bedPos, k -> new ArrayList<>());
+
         for (int i = 0; i < bedOrder.size(); i++) {
             int id = bedOrder.get(i);
             if (id == leavingEntityId || !currentSleeperIds.contains(id)) {
@@ -117,10 +180,18 @@ public final class BedOccupancyTracker {
         }
 
         Map<Integer, Integer> syncMap = new HashMap<>();
+
         for (int i = 0; i < bedOrder.size(); i++) {
             syncMap.put(bedOrder.get(i), i);
         }
 
-        Services.NETWORK.broadcastBedOccupancy(level, bedPos, syncMap);
+        Map<Integer, SleepPosition> sleepPosMap = new HashMap<>();
+
+        for (int id : syncMap.keySet()) {
+            SleepPosition sleepPos = serverSleepPosCache.get(id);
+            if (sleepPos != null) sleepPosMap.put(id, sleepPos);
+        }
+
+        Services.NETWORK.broadcastBedOccupancy(level, bedPos, syncMap, sleepPosMap);
     }
 }
