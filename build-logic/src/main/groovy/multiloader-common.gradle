@@ -1,3 +1,5 @@
+import groovy.json.JsonOutput
+
 plugins {
     id 'java-library'
     id 'maven-publish'
@@ -23,6 +25,10 @@ java {
     publishing.publications.configureEach {
         suppressPomMetadataWarningsFor(variant)
     }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
 }
 
 tasks.withType(Jar).configureEach {
@@ -56,6 +62,8 @@ processResources {
             'group'                        : project.group,
             'minecraft_version'            : minecraft_version,
             'minecraft_version_range'      : minecraft_version_range,
+            'fabric_version'               : fabric_version,
+            'fabric_loader_version'        : fabric_loader_version,
             'mod_name'                     : mod_name,
             'mod_author'                   : mod_author,
             'mod_id'                       : mod_id,
@@ -63,20 +71,19 @@ processResources {
             'description'                  : project.description,
             "forge_version"                : forge_version,
             "forge_loader_version_range"   : forge_loader_version_range,
-            "forge_version_range"          : forge_version_range,
             'credits'                      : credits,
             'java_version'                 : java_version
     ]
 
     var jsonExpandProps = expandProps.collectEntries {
-        key, value -> [(key): value instanceof String ? value.replace('\n', '\\\\n') : value]
+        key, value -> [(key): value instanceof String ? JsonOutput.toJson(value).replaceAll('^"|"$', '') : value]
     }
 
     filesMatching(['META-INF/mods.toml']) {
         expand expandProps
     }
 
-    filesMatching(['pack.mcmeta', '*.mixins.json']) {
+    filesMatching(['pack.mcmeta', 'fabric.mod.json', '*.mixins.json']) {
         expand jsonExpandProps
     }
 

@@ -37,7 +37,7 @@ public class ForgeNetworkRegistry {
 
     private static void handleClientPayload(BedOccupancySyncPayload payload, Supplier<NetworkEvent.Context> contextSupplier) {
         NetworkEvent.Context context = contextSupplier.get();
-        context.enqueueWork(() -> Minecraft.getInstance().execute(() -> BedOccupancyTracker.updateClientCache(payload.entitySlots())));
+        context.enqueueWork(() -> Minecraft.getInstance().execute(() -> BedOccupancyTracker.updateClientCache(payload.entitySlots(), payload.entitySleepPositions())));
         context.setPacketHandled(true);
     }
 }

@@ -8,10 +8,12 @@
     "BedBlockMixin",
     "EntityMixin",
     "LivingEntityMixin",
+    "PlayerMixin",
     "VillagerMixin"
   ],
   "client": [
     "EntityRendererMixin",
+    "GameRendererMixin",
     "LivingEntityRendererMixin"
   ],
   "server": [],
@@ -22,4 +24,3 @@
     "requireAnnotations": true
   }
 }
-

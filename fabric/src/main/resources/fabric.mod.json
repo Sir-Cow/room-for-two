@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "id": "${mod_id}",
+  "version": "${version}",
+  "name": "${mod_name}",
+  "description": "${description}",
+  "authors": [
+    "${mod_author}"
+  ],
+  "contributors": [
+    "ChaosTheLegend", "LokiLeiche"
+  ],
+  "contact": {
+    "homepage": "https://modrinth.com/mod/room-for-two",
+    "sources": "https://github.com/Sir-Cow/room-for-two",
+    "issues": "https://github.com/Sir-Cow/room-for-two/issues"
+  },
+  "license": "${license}",
+  "icon": "icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "sircow.roomfortwo.FabricRoomForTwo",
+      "sircow.roomfortwo.network.FabricNetworkRegistry"
+    ],
+    "client": [
+      "sircow.roomfortwo.network.FabricNetworkRegistry"
+    ]
+  },
+  "mixins": [
+    "roomfortwo.mixins.json",
+    "roomfortwo.fabric.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${fabric_loader_version}",
+    "fabric-api": "*",
+    "minecraft": [
+      "1.20",
+      "1.20.1"
+    ],
+    "java": ">=${java_version}"
+  },
+  "custom": {
+    "modmenu": {
+      "links": {
+        "modmenu.modrinth": "https://modrinth.com/mod/room-for-two",
+        "modmenu.curseforge": "https://curseforge.com/minecraft/mc-mods/room-for-two"
+      },
+      "update_checker": true
+    }
+  }
+}
