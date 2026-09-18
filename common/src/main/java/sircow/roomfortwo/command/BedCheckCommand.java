@@ -8,7 +8,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.permissions.Permissions;
-import net.minecraft.world.level.block.BedBlock;
+import net.minecraft.world.level.block.AbstractBedBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BedPart;
 import net.minecraft.world.phys.BlockHitResult;
@@ -34,14 +34,14 @@ public class BedCheckCommand {
                 BlockPos hitPos = hitResult.getBlockPos();
                 BlockState state = player.level().getBlockState(hitPos);
 
-                if (!(state.getBlock() instanceof BedBlock)) {
+                if (!(state.getBlock() instanceof AbstractBedBlock)) {
                     context.getSource().sendFailure(Component.translatable("commands.roomfortwo.bedcheck.no_bed"));
                     return 0;
                 }
 
                 BlockPos bedPos = hitPos;
 
-                if (state.getValue(BedBlock.PART) != BedPart.HEAD) bedPos = hitPos.relative(state.getValue(BedBlock.FACING));
+                if (state.getValue(AbstractBedBlock.PART) != BedPart.HEAD) bedPos = hitPos.relative(state.getValue(AbstractBedBlock.FACING));
 
                 ServerLevel level = player.level();
                 int count = BedOccupancyAPI.getOccupantCount(level, bedPos);

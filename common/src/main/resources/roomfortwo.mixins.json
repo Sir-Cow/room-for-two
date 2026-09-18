@@ -4,7 +4,7 @@
   "package": "sircow.roomfortwo.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "BedBlockMixin",
+    "AbstractBedBlockMixin",
     "EntityMixin",
     "LivingEntityMixin",
     "PlayerMixin",

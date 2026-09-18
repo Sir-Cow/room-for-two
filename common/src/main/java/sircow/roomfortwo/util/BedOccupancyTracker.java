@@ -4,7 +4,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.level.block.BedBlock;
+import net.minecraft.world.level.block.AbstractBedBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -20,7 +20,17 @@ public final class BedOccupancyTracker {
     private static final Map<BlockPos, List<Integer>> serverBedOrders = new ConcurrentHashMap<>();
     private static final Map<Integer, SleepPosition> serverSleepPosCache = new ConcurrentHashMap<>();
 
+    private static int currentlyLeavingEntityId = -1;
+
     private BedOccupancyTracker() {}
+
+    public static void setCurrentlyLeaving(int entityId) {
+        currentlyLeavingEntityId = entityId;
+    }
+
+    public static void clearCurrentlyLeaving() {
+        currentlyLeavingEntityId = -1;
+    }
 
     public static int getSlot(int entityId) {
         return clientSlotCache.getOrDefault(entityId, 0);
@@ -57,7 +67,8 @@ public final class BedOccupancyTracker {
         if (bedOrder != null) {
             int count = 0;
             for (int id : bedOrder) {
-                if (id == -1) continue;
+                if (id == -1 || id == currentlyLeavingEntityId) continue;
+
                 if (level.getEntity(id) instanceof LivingEntity e && e.isSleeping()) {
                     count++;
                 }
@@ -66,7 +77,7 @@ public final class BedOccupancyTracker {
         }
         return level.getEntitiesOfClass(
                 LivingEntity.class,
-                new AABB(bedPos).inflate(4.0), entity -> entity.isSleeping() && entity.getSleepingPos().map(bedPos::equals).orElse(false)
+                new AABB(bedPos).inflate(4.0), entity -> entity.isSleeping() && entity.getId() != currentlyLeavingEntityId  && entity.getSleepingPos().map(bedPos::equals).orElse(false)
         ).size();
     }
 
@@ -111,7 +122,7 @@ public final class BedOccupancyTracker {
 
         if (enteringPos != null) {
             BlockState bedState = level.getBlockState(bedPos);
-            Direction facing = bedState.getValue(BedBlock.FACING);
+            Direction facing = bedState.getValue(AbstractBedBlock.FACING);
 
             final float middleX = bedPos.getX() + 0.5F;
             final float middleZ = bedPos.getZ() + 0.5F;

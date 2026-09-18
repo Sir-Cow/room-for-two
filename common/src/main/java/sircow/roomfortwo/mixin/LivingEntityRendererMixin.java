@@ -44,27 +44,27 @@ public class LivingEntityRendererMixin {
                 if (slot % 2 == 0) poseStack.translate(-0.25F, 0.0F, finalZ);
                 else poseStack.translate(0.25F, 0.0F, finalZ);
                 if (firstPerson && localPlayer) {
-                    if (slot % 2 == 0) poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
-                    else poseStack.mulPose(Axis.YP.rotationDegrees(-90.0F));
+                    if (slot % 2 == 0) poseStack.rotateDegrees(Axis.YP, 90.0F);
+                    else poseStack.rotateDegrees(Axis.YP, -90.0F);
                 }
                 else {
-                    if (slot % 2 == 0) poseStack.mulPose(Axis.YP.rotationDegrees(-90.0F));
-                    else poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
+                    if (slot % 2 == 0) poseStack.rotateDegrees(Axis.YP, -90.0F);
+                    else poseStack.rotateDegrees(Axis.YP, 90.0F);
                 }
             }
             case LEFT -> {
                 poseStack.translate(0.25F, 0.0F, finalZ);
-                if (firstPerson && localPlayer) poseStack.mulPose(Axis.YP.rotationDegrees(-90.0F));
-                else poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
+                if (firstPerson && localPlayer) poseStack.rotateDegrees(Axis.YP, -90.0F);
+                else poseStack.rotateDegrees(Axis.YP, 90.0F);
             }
             case RIGHT -> {
                 poseStack.translate(-0.25F, 0.0F, finalZ);
-                if (firstPerson && localPlayer) poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
-                else poseStack.mulPose(Axis.YP.rotationDegrees(-90.0F));
+                if (firstPerson && localPlayer) poseStack.rotateDegrees(Axis.YP, 90.0F);
+                else poseStack.rotateDegrees(Axis.YP, -90.0F);
             }
             case FRONT -> {
                 poseStack.translate(0.0F, 0.05F, finalZ);
-                poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
+                poseStack.rotateDegrees(Axis.YP, 180.0F);
             }
             case BACK -> {
                 poseStack.translate(0.0F, 0.05F, finalZ);

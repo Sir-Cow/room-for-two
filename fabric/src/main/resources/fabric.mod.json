@@ -20,7 +20,7 @@
     "environment": "*",
     "entrypoints": {
         "main": [
-          "sircow.roomfortwo.FabricRoomForTwo",
+            "sircow.roomfortwo.FabricRoomForTwo",
             "sircow.roomfortwo.network.FabricNetworkRegistry"
         ],
         "client": [
