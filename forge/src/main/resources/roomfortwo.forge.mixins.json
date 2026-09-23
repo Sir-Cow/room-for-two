@@ -2,10 +2,13 @@
   "required": true,
   "minVersion": "0.8",
   "package": "sircow.roomfortwo.mixin",
-  "refmap": "${mod_id}.refmap.json",
   "compatibilityLevel": "JAVA_21",
-  "mixins": [],
-  "client": [],
+  "mixins": [
+    "AbstractBedBlockForgeMixin"
+  ],
+  "client": [
+    "GameRendererMixin"
+  ],
   "server": [],
   "injectors": {
     "defaultRequire": 1

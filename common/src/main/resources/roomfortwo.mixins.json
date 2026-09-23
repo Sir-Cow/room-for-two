@@ -11,6 +11,7 @@
     "VillagerMixin"
   ],
   "client": [
+    "CameraAccessor",
     "CameraMixin",
     "EntityRendererMixin",
     "EntityRenderStateMixin",
