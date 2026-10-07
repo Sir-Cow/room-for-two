@@ -11,6 +11,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import sircow.roomfortwo.util.BedOccupancyTracker;
+import sircow.roomfortwo.util.SleepPosition;
 
 public class EntityViewRenderHandler {
     @SubscribeEvent
@@ -29,31 +30,51 @@ public class EntityViewRenderHandler {
         if (!(state.getBlock() instanceof BlockBed)) return;
 
         EnumFacing direction = state.getValue(BlockHorizontal.FACING);
+        boolean northSouth = direction == EnumFacing.NORTH || direction == EnumFacing.SOUTH;
 
         float baseYaw = direction.getHorizontalAngle() - 180.0F;
         int slot = BedOccupancyTracker.getSlot(player.getEntityId());
+        SleepPosition sleepPos = BedOccupancyTracker.getSleepPos(player.getEntityId());
 
-        float pitchR = -90.0F;
-        float yawR = 90.0F;
-        float rollR = -90.0F;
+        float targetPitch, targetYaw, translateX, translateY;
+        boolean evenSide;
 
-        float pitchL = -pitchR;
-        float yawL = -yawR;
+        switch (sleepPos) {
+            case LEFT:
+                evenSide = true;
+                break;
+            case RIGHT:
+                evenSide = false;
+                break;
+            case FRONT:
+                applyCamera(event, player, -90.0F, -direction.getHorizontalAngle(), 0.0F, northSouth ? -90.0F : 90.0F, 0.0F, 0.0F);
+                return;
+            case BACK:
+                applyCamera(event, player, -90.0F, -direction.getHorizontalAngle(), 180.0F, northSouth ? 90.0F : -90.0F, 0.0F, 0.0F);
+                return;
+            case NONE:
+            default:
+                evenSide = slot % 2 != 0;
+                break;
+        }
 
-        float targetPitch, targetYaw, targetRoll;
-
-        if (slot % 2 == 0) {
-            targetPitch = pitchR;
-            targetYaw = baseYaw + yawR;
-            GlStateManager.translate(-0.75F, -0.25F, 0.0F);
+        if (evenSide) {
+            targetPitch = -90.0F;
+            targetYaw = baseYaw + 90.0F;
+            translateX = -0.75F;
+            translateY = -0.25F;
         }
         else {
-            targetPitch = pitchL;
-            targetYaw = baseYaw + yawL;
-            GlStateManager.translate(0.75F, 0.25F, 0.0F);
+            targetPitch = 90.0F;
+            targetYaw = baseYaw - 90.0F;
+            translateX = 0.75F;
+            translateY = 0.25F;
         }
-        targetRoll = rollR;
 
+        applyCamera(event, player, targetPitch, targetYaw, -90.0F, -90.0F, translateX, translateY);
+    }
+
+    private void applyCamera(EntityViewRenderEvent.CameraSetup event, EntityPlayer player, float targetPitch, float targetYaw, float eventRoll, float targetRoll, float translateX, float translateY) {
         targetYaw = (targetYaw % 360.0F + 360.0F) % 360.0F;
 
         player.rotationYaw = targetYaw;
@@ -68,7 +89,9 @@ public class EntityViewRenderHandler {
 
         event.setPitch(targetPitch);
         event.setYaw(targetYaw);
-        event.setRoll(targetRoll);
+        event.setRoll(eventRoll);
+
+        if (translateX != 0.0F || translateY != 0.0F) GlStateManager.translate(translateX, translateY, 0.0F);
 
         GlStateManager.rotate(targetRoll, 1.0F, 0.0F, 0.0F);
     }

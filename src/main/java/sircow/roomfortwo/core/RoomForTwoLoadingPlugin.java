@@ -1,6 +1,7 @@
 package sircow.roomfortwo.core;
 
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
+import sircow.roomfortwo.roomfortwo.Tags;
 import zone.rong.mixinbooter.IEarlyMixinLoader;
 
 import java.util.Collections;
@@ -12,7 +13,7 @@ import java.util.Map;
 public class RoomForTwoLoadingPlugin implements IFMLLoadingPlugin, IEarlyMixinLoader {
     @Override
     public List<String> getMixinConfigs() {
-        return Collections.singletonList("mixins.roomfortwo.json");
+        return Collections.singletonList(String.format("mixins.%s.json", Tags.MOD_ID));
     }
 
     @Override

@@ -9,7 +9,7 @@ import sircow.roomfortwo.util.BedOccupancyTracker;
 public class BedOccupancySyncHandler implements IMessageHandler<BedOccupancySyncPayload, IMessage> {
     @Override
     public IMessage onMessage(BedOccupancySyncPayload message, MessageContext ctx) {
-        Minecraft.getMinecraft().addScheduledTask(() -> BedOccupancyTracker.updateClientCache(message.getEntitySlots()));
+        Minecraft.getMinecraft().addScheduledTask(() -> BedOccupancyTracker.updateClientCache(message.getEntitySlots(), message.getEntitySleepPositions()));
         return null;
     }
 }

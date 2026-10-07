@@ -4,8 +4,8 @@ repositories {
     exclusiveContent {
         forRepository {
             maven {
-                name 'CurseMaven'
-                url 'https://cursemaven.com'
+                name 'CleanroomMC CurseMaven'
+                url 'https://curse.cleanroommc.com'
             }
         }
         filter {
@@ -36,11 +36,14 @@ dependencies {
     runtimeOnly 'com.cleanroommc:osxnarratorblocker:1.0'
 }
 
-tasks.named('reobfJar').configure {
-    inputJar.set(tasks.named('shadowJar').flatMap({ it.archiveFile }))
+if (!configurations.shade.dependencies.empty) {
+    tasks.named('reobfJar').configure {
+        inputJar.set(tasks.named('shadowJar').flatMap({ it.archiveFile }))
+    }
 }
 
 tasks.shadowJar {
+    enabled = !project.configurations.shade.dependencies.empty
     archiveClassifier = 'uberdev'
     configurations = [ project.configurations.shade ]
 }

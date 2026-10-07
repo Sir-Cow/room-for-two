@@ -2,6 +2,7 @@ package sircow.roomfortwo.util;
 
 import net.minecraft.block.BlockBed;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.EnumFacing;
@@ -16,7 +17,9 @@ import java.util.*;
 
 public final class BedOccupancyTracker {
     private static final Map<Integer, Integer> clientSlotCache = new HashMap<>();
+    private static final Map<Integer, SleepPosition> clientSleepPosCache = new HashMap<>();
     private static final Map<BlockPos, List<Integer>> serverBedOrders = new HashMap<>();
+    private static final Map<Integer, SleepPosition> serverSleepPosCache = new HashMap<>();
 
     private BedOccupancyTracker() {}
 
@@ -25,12 +28,95 @@ public final class BedOccupancyTracker {
         return slot == null ? 0 : slot;
     }
 
-    public static void updateClientCache(Map<Integer, Integer> map) {
+    public static SleepPosition getSleepPos(int entityId) {
+        SleepPosition position = clientSleepPosCache.get(entityId);
+        return position == null ? SleepPosition.NONE : position;
+    }
+
+    public static void updateClientCache(Map<Integer, Integer> map, Map<Integer, SleepPosition> sleepPositions) {
         clientSlotCache.putAll(map);
+        clientSleepPosCache.putAll(sleepPositions);
     }
 
     public static void cleanClientEntity(int entityId) {
         clientSlotCache.remove(entityId);
+        clientSleepPosCache.remove(entityId);
+    }
+
+    public static void setServerSleepPos(int entityId, SleepPosition sleepPos) {
+        serverSleepPosCache.put(entityId, sleepPos);
+    }
+
+    public static SleepPosition getServerSleepPos(int entityId) {
+        SleepPosition position = serverSleepPosCache.get(entityId);
+        return position == null ? SleepPosition.NONE : position;
+    }
+
+    public static void removeServerSleepPos(int entityId) {
+        serverSleepPosCache.remove(entityId);
+    }
+
+    public static int getOccupantCount(WorldServer world, BlockPos bedPos) {
+        List<Integer> bedOrder = serverBedOrders.get(bedPos);
+
+        if (bedOrder != null) {
+            int count = 0;
+            for (int id : bedOrder) {
+                if (id == -1) continue;
+
+                Entity entity = world.getEntityByID(id);
+
+                if (entity instanceof EntityLivingBase && ((EntityLivingBase) entity).isPlayerSleeping()) count++;
+            }
+            if (count > 0) return count;
+        }
+
+        return world.getEntitiesWithinAABB(
+                EntityLivingBase.class,
+                new AxisAlignedBB(bedPos).grow(4.0D),
+                entity -> entity.isPlayerSleeping()
+                        && entity instanceof EntityPlayer
+                        && bedPos.equals(((EntityPlayer) entity).bedLocation)
+        ).size();
+    }
+
+    public static List<EntityLivingBase> getOccupants(WorldServer world, BlockPos bedPos) {
+        List<Integer> bedOrder = serverBedOrders.get(bedPos);
+
+        if (bedOrder != null) {
+            List<EntityLivingBase> occupants = new ArrayList<>();
+
+            for (int id : bedOrder) {
+                if (id == -1) continue;
+                Entity entity = world.getEntityByID(id);
+                if (entity instanceof EntityLivingBase && ((EntityLivingBase) entity).isPlayerSleeping()) occupants.add((EntityLivingBase) entity);
+            }
+            if (!occupants.isEmpty()) return occupants;
+        }
+
+        return world.getEntitiesWithinAABB(
+                EntityLivingBase.class,
+                new AxisAlignedBB(bedPos).grow(4.0D),
+                entity -> entity.isPlayerSleeping()
+                        && entity instanceof EntityPlayer
+                        && bedPos.equals(((EntityPlayer) entity).bedLocation)
+        );
+    }
+
+    public static boolean hasOccupantType(WorldServer world, BlockPos bedPos, Class<? extends EntityLivingBase> type) {
+        for (EntityLivingBase occupant : getOccupants(world, bedPos)) {
+            if (type.isInstance(occupant)) return true;
+        }
+        return false;
+    }
+
+    public static int countOccupantType(WorldServer world, BlockPos bedPos, Class<? extends EntityLivingBase> type) {
+        int count = 0;
+
+        for (EntityLivingBase occupant : getOccupants(world, bedPos)) {
+            if (type.isInstance(occupant)) count++;
+        }
+        return count;
     }
 
     public static void updateBedOccupancy(WorldServer world, BlockPos bedPos, int leavingEntityId, int enteringEntityId, Vec3d enteringPos) {
@@ -53,10 +139,10 @@ public final class BedOccupancyTracker {
             double middleX = bedPos.getX() + 0.5D;
             double middleZ = bedPos.getZ() + 0.5D;
 
-            isEnteringLeftSide = (facing == EnumFacing.NORTH && enteringPos.x > middleX)
-                    || (facing == EnumFacing.SOUTH && enteringPos.x < middleX)
-                    || (facing == EnumFacing.WEST && enteringPos.z < middleZ)
-                    || (facing == EnumFacing.EAST && enteringPos.z > middleZ);
+            isEnteringLeftSide = (facing == EnumFacing.NORTH && enteringPos.x < middleX)
+                    || (facing == EnumFacing.SOUTH && enteringPos.x > middleX)
+                    || (facing == EnumFacing.WEST && enteringPos.z > middleZ)
+                    || (facing == EnumFacing.EAST && enteringPos.z < middleZ);
         }
 
         Set<Integer> currentSleeperIds = new HashSet<>();
@@ -124,6 +210,13 @@ public final class BedOccupancyTracker {
             syncMap.put(bedOrder.get(i), i);
         }
 
-        RoomForTwoNetwork.sendToAllTracking(new BedOccupancySyncPayload(syncMap), bedPos, world.provider.getDimension());
+        Map<Integer, SleepPosition> sleepPosMap = new HashMap<>();
+        for (Integer id : syncMap.keySet()) {
+            SleepPosition sleepPos = serverSleepPosCache.get(id);
+
+            if (sleepPos != null) sleepPosMap.put(id, sleepPos);
+        }
+
+        RoomForTwoNetwork.sendToAllTracking(new BedOccupancySyncPayload(syncMap, sleepPosMap), bedPos, world.provider.getDimension());
     }
 }

@@ -5,9 +5,8 @@ plugins {
     id 'java'
     id 'java-library'
     id 'org.jetbrains.gradle.plugin.idea-ext' version '1.4.1'
-    id 'com.gtnewhorizons.retrofuturagradle' version '2.0.2'
-    id 'com.matthewprenger.cursegradle' version '1.4.0' apply false
-    id 'com.gradleup.shadow' version '9.4.+'
+    id 'com.gtnewhorizons.retrofuturagradle' version '2.0.3'
+    id 'com.gradleup.shadow' version '9.6.1'
 }
 
 apply from: 'gradle/scripts/helpers.gradle'
@@ -34,6 +33,7 @@ setDefaultProperty 'minecraft_username', true, 'Developer'
 setDefaultProperty 'extra_jvm_args', false, ''
 setDefaultProperty 'extra_tweak_classes', false, ''
 setDefaultProperty 'change_minecraft_sources', false, false
+setDefaultProperty 'mixin_connector_class', false, ''
 
 version = propertyString('mod_version')
 group = propertyString('root_package')
@@ -54,6 +54,14 @@ java {
     }
     if (propertyBool('generate_javadocs_jar')) {
         withJavadocJar()
+    }
+}
+
+configurations {
+    mixinAgent {
+        canBeConsumed = false
+        canBeResolved = true
+        visible = false
     }
 }
 
@@ -117,13 +125,11 @@ dependencies {
     }
     if (propertyBool('use_mixins')) {
         String mixin = modUtils.enableMixins("zone.rong:mixinbooter:${propertyString('mixin_booter_version')}", propertyString('mixin_refmap'))
-        api (mixin) {
+        implementation (mixin) {
             transitive = false
         }
-        annotationProcessor 'org.ow2.asm:asm-debug-all:5.2'
-        annotationProcessor 'com.google.guava:guava:32.1.2-jre'
-        annotationProcessor 'com.google.code.gson:gson:2.8.9'
-        annotationProcessor (mixin) {
+        annotationProcessor mixin
+        add ('mixinAgent', mixin) {
             transitive = false
         }
     }
@@ -131,16 +137,29 @@ dependencies {
 
 apply from: 'gradle/scripts/dependencies.gradle'
 
-if (propertyBool('use_access_transformer')) {
-    for (def location : propertyStringList('access_transformer_locations')) {
-        def fileLocation = file("${projectDir}/src/main/resources/${location}")
-        if (fileLocation.exists()) {
-            tasks.deobfuscateMergedJarToSrg.accessTransformerFiles.from(fileLocation)
-            tasks.srgifyBinpatchedJar.accessTransformerFiles.from(fileLocation)
+if (propertyBool('use_mixins')) {
+    ['runClient', 'runServer', 'runObfClient', 'runObfServer'].each { taskName ->
+        tasks.named(taskName, JavaExec).configure { JavaExec task ->
+            task.doFirst {
+                if (task.debug) {
+                    task.jvmArgs("-javaagent:${configurations.mixinAgent.singleFile.absolutePath}")
+                }
+            }
         }
-        else {
+    }
+}
+
+if (propertyBool('use_access_transformer')) {
+    def atFiles = propertyStringList('access_transformer_locations').collect { location ->
+        def fileLocation = file("src/main/resources/${location}")
+        if (!fileLocation.exists()) {
             throw new GradleException("Access Transformer file [$fileLocation] does not exist!")
         }
+        return fileLocation
+    }
+
+    tasks.named('applyJST').configure {
+        accessTransformerFiles.from(atFiles)
     }
 }
 
@@ -159,7 +178,7 @@ processResources {
     inputs.property 'mixin_configs', propertyStringList('mixin_configs').join(' ')
 
     def filterList = ['mcmod.info', 'pack.mcmeta']
-    filterList.addAll(propertyStringList('mixin_configs').collect(config -> "mixins.${config}.json" as String))
+    filterList.addAll(propertyStringList('mixin_configs'))
 
     filesMatching(filterList) { fcd ->
         fcd.expand(
@@ -198,6 +217,14 @@ jar {
         if (propertyBool('use_access_transformer')) {
             attribute_map['FMLAT'] = propertyString('access_transformer_locations')
         }
+        def mixinConfigs = propertyStringList('mixin_configs')
+        if (!mixinConfigs.isEmpty()) {
+            attribute_map['MixinConfigs'] = mixinConfigs.join(',')
+        }
+        def mixinConnectorClass = propertyString('mixin_connector_class')
+        if (!mixinConnectorClass.isEmpty()) {
+            attribute_map['MixinConnector'] = mixinConnectorClass
+        }
         attributes(attribute_map)
     }
 }
@@ -230,7 +257,7 @@ idea {
 
 tasks.register('generateMixinJson') {
     group 'cleanroom helpers'
-    def missingConfig = propertyStringList('mixin_configs').findAll(config -> !file("src/main/resources/mixins.${config}.json").exists())
+    def missingConfig = propertyStringList('mixin_configs').findAll(config -> !file("src/main/resources/${config}").exists())
     onlyIf {
         if (propertyBool('use_mixins') && propertyBool('generate_mixins_json')) {
             return !missingConfig.empty
@@ -239,8 +266,8 @@ tasks.register('generateMixinJson') {
     }
     doLast {
         for (String mixinConfig : missingConfig) {
-            def file = file("src/main/resources/mixins.${mixinConfig}.json")
-            file << """{\n\t"package": "",\n\t"required": true,\n\t"refmap": "${propertyString('mixin_refmap')}",\n\t"target": "@env(DEFAULT)",\n\t"minVersion": "0.8.5",\n\t"compatibilityLevel": "JAVA_8",\n\t"mixins": [],\n\t"server": [],\n\t"client": []\n}"""
+            def file = file("src/main/resources/${mixinConfig}")
+            file << """{\n\t"package": "",\n\t"required": true,\n\t"refmap": "${propertyString('mixin_refmap')}",\n\t"target": "@env(DEFAULT)",\n\t"minVersion": "0.8.7",\n\t"compatibilityLevel": "JAVA_8",\n\t"mixins": [],\n\t"server": [],\n\t"client": []\n}"""
         }
     }
 }
