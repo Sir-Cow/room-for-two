@@ -1,16 +1,69 @@
-MIT License
+Sir_Cow Protective License
 
 Copyright (c) 2026 Sir_Cow
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+of this software and associated documentation files (the "Software"),
+to use, modify and compile the Software, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+1. Non-Commercial Use
+
+The Software, including any copies, modified versions, derivative works,
+forks, ports, or compiled versions substantially based upon the Software,
+may not be used for any direct or indirect monetisation or commercial purpose
+without prior written permission from the copyright holder.
+
+This includes, but is not limited to, selling the Software or a copy or
+derivative of it, placing the Software behind a paid download or subscription,
+accepting payment specifically for access to the Software, using the Software
+as part of a paid service, or otherwise obtaining commercial revenue from the
+Software or a derivative of it.
+
+2. Modification and Derivative Works
+
+Modified or derivative versions of the Software must contain noticeable
+differences from the original Software and must not be presented
+as the original Software or an official version of the original Software.
+
+Changing only the name, branding, metadata, version number, package name,
+copyright notice, or other minor details does not constitute sufficient
+variation.
+
+3. Attribution
+
+All copies, modified versions, derivative works, forks, ports, and compiled
+versions of the Software must provide clear and noticeable credit to the
+original author.
+
+The attribution must identify the original author and, where
+reasonably possible, provide a link to the original Software or its original
+project page.
+
+The attribution and this license must not be removed, obscured, or presented
+in a manner that falsely suggests that the original Software was created by
+another person or organisation.
+
+4. Generative AI
+
+The Software may not be used as training data, fine-tuning data, evaluation
+data, or other input for the development or operation of generative artificial
+intelligence systems without prior written permission from the copyright
+holder.
+
+5. License Notice
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+6. Termination
+
+Any permission granted under this license automatically terminates if any of
+the conditions of this license are violated.
+
+Upon termination, the recipient must cease using, distributing, or
+redistributing the Software and any derivative works based upon it, except
+where continued use is otherwise permitted by applicable law or by a separate
+written license from the copyright holder.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,

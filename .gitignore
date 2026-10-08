@@ -18,10 +18,14 @@ out
 build
 .gradle
 
+# kate
+*.kate-swp
+
 # other
 eclipse
 run
 runs
+.vscode
 
 # datagen
 generated

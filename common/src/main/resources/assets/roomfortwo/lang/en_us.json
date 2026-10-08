@@ -1,0 +1,12 @@
+{
+  "commands.roomfortwo.bedcheck.no_bed": "You must be looking at a bed",
+  "commands.roomfortwo.bedcheck.empty": "This bed is empty",
+  "commands.roomfortwo.bedcheck.occupants": "This bed has %s occupant(s): %s",
+  "commands.roomfortwo.sleeppos.invalid": "Invalid position: %s. Use: left, right, front, back, none",
+  "commands.roomfortwo.sleeppos.changed": "Sleep position changed to %s",
+  "commands.roomfortwo.sleeppos.set": "Sleep position set to %s",
+  "commands.roomfortwo.sleeppos.query": "Current sleep position: %s",
+
+  "advancements.roomfortwo.multiple_sleep_in_bed.title": "Is there Room For Two?",
+  "advancements.roomfortwo.multiple_sleep_in_bed.description": "Share a Bed with another occupant"
+}
