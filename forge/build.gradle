@@ -1,6 +1,6 @@
 plugins {
     id 'multiloader-loader'
-    id 'net.minecraftforge.gradle' version '7.0.34'
+    id 'net.minecraftforge.gradle' version '7.0.40'
     id 'net.minecraftforge.jarjar' version '0.2.3'
 }
 base {
@@ -45,9 +45,16 @@ repositories {
     mavenCentral()
 }
 
+jarJar.register() {
+    archiveClassifier = null
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
 dependencies {
     implementation minecraft.dependency("net.minecraftforge:forge:${minecraft_version}-${forge_version}")
     compileOnly project(':common')
+    compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:0.5.5"))
+    implementation(jarJar("io.github.llamalad7:mixinextras-forge:0.5.5"))
 }
 
 tasks.named('jar', Jar) {
@@ -56,11 +63,6 @@ tasks.named('jar', Jar) {
                 "MixinConfigs": "${mod_id}.mixins.json,${mod_id}.forge.mixins.json"
         ])
     }
-}
-
-jarJar.register() {
-    archiveClassifier = null
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 def loaderAttribute = Attribute.of('io.github.mcgradleconventions.loader', String)

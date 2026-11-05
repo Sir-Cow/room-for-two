@@ -4,6 +4,7 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ViewportEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -83,8 +84,15 @@ public class ClientViewportHandler {
         try {
             Method moveMethod = Camera.class.getDeclaredMethod("move", float.class, float.class, float.class);
             moveMethod.setAccessible(true);
-            float verticalOffset = ((float) slot / 2) * 0.25F;
-            moveMethod.invoke(camera, forward, up, verticalOffset);
+            moveMethod.invoke(camera, forward, up, 0.0F);
+
+            int level = slot / 2;
+            if (level > 0) {
+                Vec3 pos = camera.getPosition();
+                Method setPosition = Camera.class.getDeclaredMethod("setPosition", Vec3.class);
+                setPosition.setAccessible(true);
+                setPosition.invoke(camera, new Vec3(pos.x, pos.y + level * 0.4F, pos.z));
+            }
         }
         catch (Exception ignored) {}
     }
