@@ -1,5 +1,6 @@
 package sircow.roomfortwo.mixin;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
@@ -19,6 +20,9 @@ public class PlayerMixin {
         SleepPosition position = SleepPosition.fromString(saved);
 
         if (position != null) BedOccupancyTracker.setServerSleepPos(self.getId(), position);
+        if (self.level() instanceof ServerLevel serverLevel && self.isSleeping()) {
+            self.getSleepingPos().ifPresent(pos -> BedOccupancyTracker.syncBed(serverLevel, pos));
+        }
     }
 
     @Inject(method = "addAdditionalSaveData", at = @At("TAIL"))
