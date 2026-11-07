@@ -48,6 +48,9 @@ public class GameRendererMixin {
         SleepPosition sleepPos = BedOccupancyTracker.getSleepPos(entity.getId());
 
         Quaternionf rotation = accessor.roomfortwo$getRotation();
+        Quaternionf structurePose = new Quaternionf(rotation).mul(new Quaternionf().rotationYXZ((float) (Math.PI - Math.toRadians(baseYaw - 180.0F)), 0.0F, 0.0F).invert()
+        );
+
         rotation.identity();
         rotation.rotateY((float) Math.toRadians(baseYaw));
 
@@ -77,5 +80,7 @@ public class GameRendererMixin {
                 if (dir == Direction.EAST || dir == Direction.WEST) rotation.rotateZ((float) Math.toRadians(180.0));
             }
         }
+
+        rotation.premul(structurePose);
     }
 }
