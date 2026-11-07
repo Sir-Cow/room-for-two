@@ -8,6 +8,10 @@
     "EntityMixin",
     "LivingEntityMixin",
     "PlayerMixin",
+    "PoiRecordMixin",
+    "SleepInBedMixin",
+    "ValidateNearbyPoiMixin",
+    "VillagerGoalPackagesMixin",
     "VillagerMixin"
   ],
   "client": [
