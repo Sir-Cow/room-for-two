@@ -6,6 +6,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionf;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -22,6 +23,8 @@ public abstract class CameraMixin {
     @Shadow private Entity entity;
 
     @Shadow protected abstract void move(float forwards, float up, float right);
+    @Shadow public abstract Vec3 position();
+    @Shadow protected abstract void setPosition(Vec3 position);
 
     @Inject(method = "setup", at = @At("TAIL"))
     private void roomfortwo$adjustSleepCamera(Level level, Entity entity, boolean detached, boolean inverseView, float partialTick, CallbackInfo ci) {
@@ -35,10 +38,14 @@ public abstract class CameraMixin {
         float baseYaw = dir.toYRot();
         int slot = BedOccupancyTracker.getSlot(this.entity.getId());
         SleepPosition sleepPos = BedOccupancyTracker.getSleepPos(this.entity.getId());
-        float verticalOffset = ((float) slot / 2) * 0.25F;
+
+        Quaternionf structurePose = new Quaternionf(rotation).mul(new Quaternionf().rotationYXZ((float) (Math.PI - Math.toRadians(baseYaw - 180.0F)), 0.0F, 0.0F).invert()
+        );
 
         rotation.identity();
         rotation.rotateY((float) Math.toRadians(baseYaw));
+
+        float moveForwards, moveUp;
 
         switch (sleepPos) {
             case NONE -> {
@@ -46,30 +53,49 @@ public abstract class CameraMixin {
                 else rotation.rotateZ((float) Math.toRadians(90.0));
                 if (dir == Direction.NORTH || dir == Direction.SOUTH) rotation.rotateX((float) Math.toRadians(90.0));
                 if (dir == Direction.EAST || dir == Direction.WEST) rotation.rotateX((float) Math.toRadians(-90.0));
-                move(-0.75F, 0.1F, verticalOffset);
+                moveForwards = -0.75F;
+                moveUp = 0.1F;
             }
             case LEFT -> {
                 rotation.rotateZ((float) Math.toRadians(90.0));
                 if (dir == Direction.NORTH || dir == Direction.SOUTH) rotation.rotateX((float) Math.toRadians(90.0));
                 if (dir == Direction.EAST || dir == Direction.WEST) rotation.rotateX((float) Math.toRadians(-90.0));
-                move(-0.75F, 0.1F, verticalOffset);
+                moveForwards = -0.75F;
+                moveUp = 0.1F;
             }
             case RIGHT -> {
                 rotation.rotateZ((float) Math.toRadians(-90.0));
                 if (dir == Direction.NORTH || dir == Direction.SOUTH) rotation.rotateX((float) Math.toRadians(90.0));
                 if (dir == Direction.EAST || dir == Direction.WEST) rotation.rotateX((float) Math.toRadians(-90.0));
-                move(-0.75F, 0.1F, verticalOffset);
+                moveForwards = -0.75F;
+                moveUp = 0.1F;
             }
             case FRONT -> {
                 rotation.rotateX((float) Math.toRadians(-90.0));
                 if (dir == Direction.NORTH || dir == Direction.SOUTH) rotation.rotateZ((float) Math.toRadians(180.0));
-                move(-0.25F, 0.0F, verticalOffset);
+                moveForwards = -0.25F;
+                moveUp = 0.0F;
             }
             case BACK -> {
                 rotation.rotateX((float) Math.toRadians(90.0));
                 if (dir == Direction.EAST || dir == Direction.WEST) rotation.rotateZ((float) Math.toRadians(180.0));
-                move(-0.5F, 0.0F, verticalOffset);
+                moveForwards = -0.5F;
+                moveUp = 0.0F;
             }
+            default -> {
+                moveForwards = 0.0F;
+                moveUp = 0.0F;
+            }
+        }
+
+        rotation.premul(structurePose);
+        move(moveForwards, moveUp, 0.0F);
+
+        int slotLevel = slot / 2;
+
+        if (slotLevel > 0) {
+            Vec3 pos = this.position();
+            this.setPosition(new Vec3(pos.x, pos.y + slotLevel * 0.4F, pos.z));
         }
     }
 }
