@@ -74,6 +74,12 @@ public class GameRendererMixin {
             poseStack.translate(-rotation.m02() * 0.5F, -rotation.m12() * 0.5F, -rotation.m22() * 0.5F);
         }
 
+        int slotLevel = BedOccupancyTracker.getSlot(livingEntity.getId()) / 2;
+
+        if (slotLevel > 0) {
+            poseStack.translate(0.0F, -0.4F * slotLevel, 0.0F);
+        }
+
         Matrix3f inverseViewRotation = new Matrix3f(poseStack.last().normal()).invert();
 
         RenderSystem.setInverseViewRotationMatrix(inverseViewRotation);
