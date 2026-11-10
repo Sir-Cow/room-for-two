@@ -71,7 +71,6 @@ processResources {
             'description'                  : project.description,
             "forge_version"                : forge_version,
             "forge_loader_version_range"   : forge_loader_version_range,
-            "forge_version_range"          : forge_version_range,
             'credits'                      : credits,
             'java_version'                 : java_version
     ]

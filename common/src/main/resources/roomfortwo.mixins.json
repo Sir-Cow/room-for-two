@@ -8,6 +8,10 @@
     "BedBlockMixin",
     "EntityMixin",
     "LivingEntityMixin",
+    "PlayerMixin",
+    "PoiRecordMixin",
+    "SleepInBedMixin",
+    "ValidateNearbyPoiMixin",
     "VillagerMixin"
   ],
   "client": [

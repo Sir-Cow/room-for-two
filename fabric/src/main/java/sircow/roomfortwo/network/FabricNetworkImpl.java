@@ -1,27 +1,42 @@
 package sircow.roomfortwo.network;
 
-import io.netty.buffer.Unpooled;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import sircow.roomfortwo.Constants;
+import net.minecraft.world.phys.Vec3;
 import sircow.roomfortwo.platform.services.IPlatformNetwork;
+import sircow.roomfortwo.util.BedOccupancyTracker;
+import sircow.roomfortwo.util.SleepPosition;
 
 import java.util.Map;
 
 public class FabricNetworkImpl implements IPlatformNetwork {
     @Override
-    public void broadcastBedOccupancy(ServerLevel level, BlockPos bedPos, Map<Integer, Integer> entitySlots) {
-        BedOccupancySyncPayload payload = new BedOccupancySyncPayload(entitySlots);
+    public void broadcastBedOccupancy(ServerLevel level, BlockPos bedPos, Map<Integer, Integer> entitySlots, Map<Integer, SleepPosition> entitySleepPositions) {
+        BedOccupancySyncPayload payload = new BedOccupancySyncPayload(entitySlots, entitySleepPositions);
+        Vec3 centre = BedOccupancyTracker.bedWorldCentre(level, bedPos);
 
         for (ServerPlayer player : level.players()) {
-            if (player.blockPosition().closerThan(bedPos, 128)) {
-                FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
-                payload.encode(buf);
-                ServerPlayNetworking.send(player, Constants.id("bed_occupancy_sync"), buf);
+            if (player.position().closerThan(centre, 128)) {
+                FabricNetworkRegistry.sendBedOccupancySync(player, payload);
             }
         }
+    }
+
+    @Override
+    public void broadcastSleepPosition(ServerLevel level, BlockPos bedPos, Map<Integer, SleepPosition> entitySleepPositions) {
+        BedOccupancySyncPayload payload = new BedOccupancySyncPayload(Map.of(), entitySleepPositions);
+        Vec3 centre = BedOccupancyTracker.bedWorldCentre(level, bedPos);
+
+        for (ServerPlayer player : level.players()) {
+            if (player.position().closerThan(centre, 128)) {
+                FabricNetworkRegistry.sendBedOccupancySync(player, payload);
+            }
+        }
+    }
+
+    @Override
+    public void sendBedOccupancy(ServerPlayer player, Map<Integer, Integer> entitySlots, Map<Integer, SleepPosition> entitySleepPositions) {
+        FabricNetworkRegistry.sendBedOccupancySync(player, new BedOccupancySyncPayload(entitySlots, entitySleepPositions));
     }
 }
