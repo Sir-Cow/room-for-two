@@ -1,6 +1,7 @@
 package sircow.roomfortwo.mixin;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -21,6 +22,9 @@ public class PlayerMixin {
         SleepPosition position = SleepPosition.fromString(saved);
 
         if (position != null) BedOccupancyTracker.setServerSleepPos(self.getId(), position);
+        if (self.getLevel() instanceof ServerLevel serverLevel && self.isSleeping()) {
+            self.getSleepingPos().ifPresent(pos -> BedOccupancyTracker.syncBed(serverLevel, pos));
+        }
     }
 
     @Inject(method = "addAdditionalSaveData", at = @At("TAIL"))

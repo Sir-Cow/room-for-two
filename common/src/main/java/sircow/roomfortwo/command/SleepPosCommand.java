@@ -7,8 +7,11 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
+import sircow.roomfortwo.platform.Services;
 import sircow.roomfortwo.util.BedOccupancyTracker;
 import sircow.roomfortwo.util.SleepPosition;
+
+import java.util.Map;
 
 public class SleepPosCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
@@ -29,6 +32,10 @@ public class SleepPosCommand {
 
                             BedOccupancyTracker.setServerSleepPos(player.getId(), position);
                             context.getSource().sendSuccess(new TranslatableComponent("commands.roomfortwo.sleeppos.set", position.getName()), false);
+
+                            if (player.getSleepingPos().isPresent()) {
+                                Services.NETWORK.broadcastSleepPosition(player.getLevel(), player.getSleepingPos().get(), Map.of(player.getId(), position));
+                            }
                             return 1;
                         }))
                 .executes(context -> {
