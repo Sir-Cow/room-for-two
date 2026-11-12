@@ -8,6 +8,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
 import org.jetbrains.annotations.NotNull;
+import sircow.roomfortwo.network.BedOccupancySyncPayload;
+import sircow.roomfortwo.network.RoomForTwoNetwork;
 import sircow.roomfortwo.util.BedOccupancyTracker;
 import sircow.roomfortwo.util.SleepPosition;
 
@@ -56,6 +58,15 @@ public class SleepPosCommand extends CommandBase {
 
         BedOccupancyTracker.setServerSleepPos(player.getEntityId(), position);
         sender.sendMessage(new TextComponentTranslation("commands.roomfortwo.sleeppos.set", position.getName()));
+
+        BlockPos bedPos = player.bedLocation;
+        if (player.isPlayerSleeping() && bedPos != null) {
+            RoomForTwoNetwork.sendToAllTracking(
+                    new BedOccupancySyncPayload(Collections.emptyMap(), Collections.singletonMap(player.getEntityId(), position)),
+                    bedPos,
+                    player.world.provider.getDimension()
+            );
+        }
     }
 
     @Override

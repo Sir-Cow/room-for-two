@@ -91,7 +91,10 @@ public class EntityViewRenderHandler {
         event.setYaw(targetYaw);
         event.setRoll(eventRoll);
 
-        if (translateX != 0.0F || translateY != 0.0F) GlStateManager.translate(translateX, translateY, 0.0F);
+        int slotLevel = BedOccupancyTracker.getSlot(player.getEntityId()) / 2;
+        float translateZ = slotLevel > 0 ? (targetPitch > 0.0F ? 0.4F : -0.4F) * slotLevel : 0.0F;
+
+        if (translateX != 0.0F || translateY != 0.0F || translateZ != 0.0F) GlStateManager.translate(translateX, translateY, translateZ);
 
         GlStateManager.rotate(targetRoll, 1.0F, 0.0F, 0.0F);
     }

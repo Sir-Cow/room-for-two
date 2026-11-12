@@ -52,9 +52,16 @@ public class EntityPlayerMixin {
     private void roomfortwo$onStopSleeping(boolean immediately, boolean updateWorldFlag, boolean setSpawn, CallbackInfo ci) {
         EntityPlayer self = (EntityPlayer) (Object) this;
         if (!(self.world instanceof WorldServer)) return;
+
+        BedOccupancyTracker.setCurrentlyLeaving(self.getEntityId());
         BlockPos bedPos = self.bedLocation;
 
         if (bedPos != null) BedOccupancyTracker.updateBedOccupancy((WorldServer) self.world, bedPos, self.getEntityId(), -1, null);
+    }
+
+    @Inject(method = "wakeUpPlayer", at = @At("RETURN"))
+    private void roomfortwo$afterStopSleeping(boolean immediately, boolean updateWorldFlag, boolean setSpawn, CallbackInfo ci) {
+        BedOccupancyTracker.clearCurrentlyLeaving();
     }
 
     @Inject(method = "readEntityFromNBT(Lnet/minecraft/nbt/NBTTagCompound;)V", at = @At("TAIL"))
@@ -67,6 +74,28 @@ public class EntityPlayerMixin {
         SleepPosition position = SleepPosition.fromString(saved);
 
         if (position != null) BedOccupancyTracker.setServerSleepPos(self.getEntityId(), position);
+    }
+
+    // restore occupancy slot so it persists on leave + rejoin
+    @Inject(method = "readEntityFromNBT(Lnet/minecraft/nbt/NBTTagCompound;)V", at = @At("TAIL"))
+    private void roomfortwo$restoreBedOccupantSlot(NBTTagCompound tag, CallbackInfo ci) {
+        EntityPlayer self = (EntityPlayer) (Object) this;
+
+        if (!(self.world instanceof WorldServer)) return;
+        if (!tag.hasKey("roomfortwo$bedSlot") || self.bedLocation == null) return;
+
+        BedOccupancyTracker.restoreOccupant((WorldServer) self.world, self.bedLocation, self.getEntityId(), tag.getInteger("roomfortwo$bedSlot"));
+    }
+
+    @Inject(method = "writeEntityToNBT(Lnet/minecraft/nbt/NBTTagCompound;)V", at = @At("TAIL"))
+    private void roomfortwo$saveBedOccupantSlot(NBTTagCompound tag, CallbackInfo ci) {
+        EntityPlayer self = (EntityPlayer) (Object) this;
+
+        if (!self.isPlayerSleeping() || !(self.world instanceof WorldServer)) return;
+        if (self.bedLocation == null) return;
+
+        int slot = BedOccupancyTracker.getServerSlot(self.world, self.bedLocation, self.getEntityId());
+        if (slot >= 0) tag.setInteger("roomfortwo$bedSlot", slot);
     }
 
     @Inject(method = "writeEntityToNBT(Lnet/minecraft/nbt/NBTTagCompound;)V", at = @At("TAIL"))
